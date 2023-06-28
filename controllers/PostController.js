@@ -11,17 +11,30 @@ export const getLastTags = async (req, res) => {
     res.json(tags);
   } catch (error) {
     console.error("Err", err);
-    res.status(500).json({ message: "Failed to get articles" });
+    res.status(500).json({ message: "Failed to get tags" });
   }
 };
 
 export const getAll = async (req, res) => {
   try {
-    const posts = await PostModel.find().populate("user").exec();
+    const { sortBy } = req.query;
+    let sortOptions = {};
+
+    if (sortBy === "viewsCount") {
+      sortOptions = { viewsCount: "desc" };
+    } else if (sortBy === "createdAt") {
+      sortOptions = { createdAt: "desc" };
+    }
+
+    const posts = await PostModel.find()
+      .sort(sortOptions)
+      .populate("user")
+      .exec();
+
     res.json(posts);
   } catch (error) {
     console.error("Err", err);
-    res.status(500).json({ message: "Failed to get articles" });
+    res.status(500).json({ message: "Failed to get all articles" });
   }
 };
 
@@ -45,7 +58,7 @@ export const getOne = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({
-      message: "Не удалось получить статьи",
+      message: "Failed to get article",
     });
   }
 };
@@ -58,7 +71,7 @@ export const remove = async (req, res) => {
 
     if (!doc) {
       return res.status(404).json({
-        message: "Статья не найдена",
+        message: "Article not found...",
       });
     }
 
@@ -68,7 +81,7 @@ export const remove = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({
-      message: "Не удалось удалить статью",
+      message: "Failed to delete article",
     });
   }
 };
@@ -79,7 +92,7 @@ export const create = async (req, res) => {
       title: req.body.title,
       text: req.body.text,
       imageUrl: req.body.imageUrl,
-      tags: req.body.tags.split(','),
+      tags: req.body.tags,
       user: req.userId,
     });
 
@@ -104,7 +117,7 @@ export const update = async (req, res) => {
         title: req.body.title,
         text: req.body.text,
         imageUrl: req.body.imageUrl,
-        tags: req.body.tags.split(','),
+        tags: req.body.tags,
         user: req.userId,
       }
     );
@@ -115,7 +128,7 @@ export const update = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({
-      message: "Не удалось обновить статью",
+      message: "Failed to update article",
     });
   }
 };

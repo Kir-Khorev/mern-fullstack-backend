@@ -5,18 +5,18 @@ export default (req, res, next) => {
 
   if (token) {
     try {
-      const decoded = jwt.verify(token, "secret123");
+      const decoded = jwt.verify(token, "secretExample");
 
       req.userId = decoded._id;
       next();
     } catch (e) {
       return res.status(403).json({
-        message: "Нет доступа",
+        message: "No access",
       });
     }
   } else {
     return res.status(403).json({
-      message: "Нет доступа",
+      message: "No access",
     });
   }
 };
