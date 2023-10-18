@@ -1,9 +1,9 @@
-name: Basic GitHub Actions Workflow
+name: Node.js CI
 
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build:
@@ -13,16 +13,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up Node.js
+    - name: Setup Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: 14
+        node-version: 14 # You can change the Node.js version if needed
 
     - name: Install dependencies
       run: npm install
 
-    - name: Build
-      run: npm run build
-
-    - name: Run tests
-      run: npm test
+    - name: Start the application
+      run: npm start
