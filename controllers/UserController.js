@@ -1,6 +1,6 @@
-import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
-import UserModel from "../models/Users.js";
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import UserModel from '../models/Users.js';
 
 export const register = async (req, res) => {
   try {
@@ -22,17 +22,17 @@ export const register = async (req, res) => {
       {
         _id: user._id,
       },
-      "secretExample",
+      'secretExample',
       {
-        expiresIn: "30d",
+        expiresIn: '30d',
       }
     );
 
     const { passwordHash, ...userData } = user._doc;
     res.json({ ...userData, token });
   } catch (error) {
-    console.error("Err", err);
-    res.status(500).json({ message: "Registered failed..." });
+    console.error('Err', error);
+    res.status(500).json({ message: 'Registered failed...' });
   }
 };
 
@@ -42,7 +42,7 @@ export const login = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({
-        message: "User not found",
+        message: 'User not found',
       });
     }
 
@@ -52,7 +52,7 @@ export const login = async (req, res) => {
     );
     if (isValidPass) {
       return res.status(400).json({
-        message: "Password or login is wrong",
+        message: 'Password or login is wrong',
       });
     }
 
@@ -61,9 +61,9 @@ export const login = async (req, res) => {
       {
         _id: user._id,
       },
-      "secretExample",
+      'secretExample',
       {
-        expiresIn: "30d",
+        expiresIn: '30d',
       }
     );
 
@@ -71,7 +71,7 @@ export const login = async (req, res) => {
     res.json({ ...userData, token });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Auth failed..." });
+    res.status(500).json({ message: 'Auth failed...' });
   }
 };
 
@@ -80,14 +80,14 @@ export const getMe = async (req, res) => {
     const user = await UserModel.findById(req.userId);
     if (!user) {
       return res.status(404).json({
-        message: "User not found",
+        message: 'User not found',
       });
     }
 
     const { passwordHash, ...userData } = user._doc;
     res.json(userData);
   } catch (error) {
-    console.error("Err", err);
-    res.status(500).json({ message: "No access 1" });
+    console.error('Err', error);
+    res.status(500).json({ message: 'No access 1' });
   }
 };

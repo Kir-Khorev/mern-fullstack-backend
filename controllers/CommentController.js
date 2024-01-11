@@ -1,19 +1,4 @@
-import PostModel from '../models/Post.js';
-
-export const getLastTags = async (req, res) => {
-  try {
-    const posts = await PostModel.find().limit(5).exec();
-    const tags = posts
-      .map((obj) => obj.tags)
-      .flat()
-      .slice(0, 5);
-
-    res.json(tags);
-  } catch (error) {
-    console.error('Err', error);
-    res.status(500).json({ message: 'Failed to get tags' });
-  }
-};
+import CommentModel from '../models/Comment.js';
 
 export const getAll = async (req, res) => {
   try {
@@ -26,15 +11,35 @@ export const getAll = async (req, res) => {
       sortOptions = { createdAt: 'desc' };
     }
 
-    const posts = await PostModel.find()
-      .sort(sortOptions)
-      .populate('user')
-      .exec();
+    const comments = await CommentModel.find().sort(sortOptions).exec();
 
-    res.json(posts);
+    res.json(comments);
   } catch (error) {
     console.error('Err', error);
-    res.status(500).json({ message: 'Failed to get all articles' });
+    res.status(500).json({ message: 'Failed to get all comments' });
+  }
+};
+
+export const getAllByPost = async (req, res) => {
+  try {
+    const postId = req.params.postId;
+    const { sortBy } = req.query;
+    let sortOptions = {};
+
+    if (sortBy === 'viewsCount') {
+      sortOptions = { viewsCount: 'desc' };
+    } else if (sortBy === 'createdAt') {
+      sortOptions = { createdAt: 'desc' };
+    }
+
+    const comments = await CommentModel.find({ postId: postId })
+      .sort(sortOptions)
+      .exec();
+
+    res.json(comments);
+  } catch (error) {
+    console.error('Err', error);
+    res.status(500).json({ message: 'Failed to get all comments for post' });
   }
 };
 
@@ -42,7 +47,7 @@ export const getOne = async (req, res) => {
   try {
     const postId = req.params.id;
 
-    const doc = await PostModel.findByIdAndUpdate(
+    const doc = await CommentModel.findByIdAndUpdate(
       { _id: postId },
       { $inc: { viewsCount: 1 } },
       { returnDocument: 'after' }
@@ -50,7 +55,7 @@ export const getOne = async (req, res) => {
 
     if (!doc) {
       return res.status(404).json({
-        message: 'не удалось найти статью',
+        message: 'не удалось найти comment',
       });
     }
 
@@ -58,20 +63,20 @@ export const getOne = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({
-      message: 'Failed to get article',
+      message: 'Failed to get comment',
     });
   }
 };
 
 export const remove = async (req, res) => {
   try {
-    const postId = req.params.id;
+    const commentId = req.params.id;
 
-    const doc = await PostModel.findOneAndDelete({ _id: postId });
+    const doc = await CommentModel.findOneAndDelete({ _id: commentId });
 
     if (!doc) {
       return res.status(404).json({
-        message: 'Article not found...',
+        message: 'Comment not found...',
       });
     }
 
@@ -81,27 +86,26 @@ export const remove = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({
-      message: 'Failed to delete article',
+      message: 'Failed to delete comment',
     });
   }
 };
 
 export const create = async (req, res) => {
   try {
-    const doc = new PostModel({
-      title: req.body.title,
+    const doc = new CommentModel({
+      name: req.body.name,
+      photo: req.body.photo,
       text: req.body.text,
-      imageUrl: req.body.imageUrl,
-      tags: req.body.tags,
-      user: req.userId,
+      postId: req.body.postId,
     });
 
-    const post = await doc.save();
+    const comment = await doc.save();
 
-    res.json(post);
+    res.json(comment);
   } catch (error) {
     console.error('Err', error);
-    res.status(500).json({ message: 'Failed to create article' });
+    res.status(500).json({ message: 'Failed to create comment' });
   }
 };
 
@@ -109,16 +113,14 @@ export const update = async (req, res) => {
   try {
     const postId = req.params.id;
 
-    await PostModel.updateOne(
+    await CommentModel.updateOne(
       {
         _id: postId,
       },
       {
-        title: req.body.title,
+        name: req.body.name,
+        photo: req.body.photo,
         text: req.body.text,
-        imageUrl: req.body.imageUrl,
-        tags: req.body.tags,
-        user: req.userId,
       }
     );
 
@@ -128,7 +130,7 @@ export const update = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({
-      message: 'Failed to update article',
+      message: 'Failed to update comment',
     });
   }
 };
