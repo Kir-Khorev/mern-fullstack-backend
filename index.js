@@ -102,10 +102,10 @@ app.patch(
 app.get('/comments', CommentController.getAll);
 
 app.get('/comments/:postId', checkAuth, CommentController.getAllByPost);
+app.delete('/comments/:id', checkAuth, CommentController.remove);
 
 app.post(
   '/comments',
-  checkAuth,
   commentCreateValidation,
   handleValidationErrors,
   CommentController.create

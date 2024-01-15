@@ -100,10 +100,32 @@ export const create = async (req, res) => {
       postId: req.body.postId,
     });
 
-    const comment = await doc.save();
+    const filter = { text: req.body.text }; // Уникальный ключ
+    const update = {
+      $setOnInsert: doc.toObject(), // Вставляем только если не существует
+    };
+
+    const options = {
+      upsert: true, // Если запись существует, обновляем; иначе вставляем новую
+      new: true, // Возвращает обновленную или вставленную запись
+      runValidators: true, // Проходит через схемные валидаторы при обновлении
+    };
+
+    const comment = await CommentModel.findOneAndUpdate(
+      filter,
+      update,
+      options
+    );
+
+    console.log('!================!', comment);
 
     res.json(comment);
   } catch (error) {
+    if (error.code === 11000) {
+      console.log('Duplicate key error, but ignoring...');
+      return res.json({ message: 'Comment already exists' });
+    }
+
     console.error('Err', error);
     res.status(500).json({ message: 'Failed to create comment' });
   }

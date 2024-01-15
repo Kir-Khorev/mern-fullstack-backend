@@ -8,12 +8,11 @@ const CommentSchema = new mongoose.Schema(
     },
     photo: {
       type: String,
-      required: true,
+      // required: true,
     },
     text: {
       type: String,
       required: true,
-      unique: true,
     },
     postId: {
       type: String,
